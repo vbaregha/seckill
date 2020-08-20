@@ -17,15 +17,12 @@
 首先分析，秒杀系统问题的本质其实是对商品库存的管理。主要业务逻辑如下图：
 
 <div align="center"><img src="pics//1553423680(1).png" width="500px"></div>
-
 用户针对库存业务分析：
 
 <div align="center"><img src="pics//1553423931(1).png" width="500px"></div>
-
 用户的购买行为：
 
 <div align="center"><img src="pics//1553424057(1).png" width="500px"></div>
-
 **难点**：如何高效地处理“竞争”。
 
 ## 2 开发环境
@@ -52,10 +49,6 @@ pom 文件的依赖可以分为 4 部分：
 - 秒杀库存表
 - 秒杀成功明细表
 
-创建 `seckill`表时，`end_time`字段默认值为`0000-00-00 00:00:00`，报错：1067 - Invalid default value for 'end_time'。
-
-因为在MySQL5.7之后，默认值范围必须为`1970-01-01 10:00:00`~`2037-12-31 23:59:59`。
-
 ### 4.2 DAO实体和接口开发
 
 首先是实体类 entity 的编写，分为 [Seckill](https://github.com/MinheZ/seckill/blob/master/src/main/java/com/seckill/entity/Seckill.java) 和 [SuccessKilled](https://github.com/MinheZ/seckill/blob/master/src/main/java/com/seckill/entity/SuccessKilled.java) 。
@@ -63,17 +56,6 @@ pom 文件的依赖可以分为 4 部分：
 [SeckillDao](https://github.com/MinheZ/seckill/blob/master/src/main/java/com/seckill/dao/SeckillDao.java) 和 [SuccessKilledDao](https://github.com/MinheZ/seckill/blob/master/src/main/java/com/seckill/dao/SuccessKilledDao.java) 接口为查询数据库，或者修改数据库的一些方法。
 
 剩下的就是一些 MyBatis 整合 Spring 的配置文件编写。
-
-启用 Junit 单元测试的时候遇到一个小插曲，如下：
-
-```properties
-jdbc.driver=com.mysql.jdbc.Driver
-jdbc.url=jdbc:mysql://localhost:3306/seckill?characterEncoding=UTF-8
-jdbc.username=root
-jdbc.password=****
-```
-
-之前没有遵循 Driud 官方设计规范，没有添加`jdbc.`前缀，导致数据库连接异常 ERROR 1045 (28000)。
 
 ### 4.3 Service层开发
 
@@ -106,11 +88,9 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 首先明确 [SeckillController](https://github.com/MinheZ/seckill/blob/master/src/main/java/com/seckill/web/SeckillController.java) 业务流程：
 
 <div align="center"><img src="pics//1553561741(1).png" width="400px"></div>
-
 详情页流程逻辑：
 
 <div align="center"><img src="pics//1553561891(1).png" width="500px"></div>
-
 一般来说，Controller 层的 URL 表达方式默认使用 Restful 规范：
 
 - GET -> 查询操作
@@ -121,7 +101,6 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 下图为秒杀 API 的 URL 设计：
 
 <div align="center"><img src="pics//1553562354(1).png" width="500px"></div>
-
 由于笔者是个前端菜鸡，因此页面那些东西就不在这里误人子弟了:non-potable_water:。
 
 ## 5 并发优化
@@ -131,7 +110,6 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 在优化之前，首先弄清楚秒杀的高并发发生在哪？如下图，红色部分代表可能会有高并发区域：
 
 <div align="center"><img src="pics//1553603148(1).png" width="350px"></div>
-
 **详情页**：参与秒杀的第一步，所有参与用户都会访问此页面。
 
 **系统时间**：在进行当前时间与秒杀开始时间对比的过程中，由于系统访问一次内存的时间(Cacheline)非常短，大约是10ns，因此这一部分可以不做具体优化。
@@ -141,7 +119,6 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 **Redis 与数据库数据一致性保证**：
 
 <div align="center"><img src="pics//1553603931(1).png" width="350px"></div>
-
 键值上设置过期时间，超时穿透；或者每当数据库变更时，主动更新至缓存。
 
 ### 5.2 数据库优化
@@ -149,7 +126,6 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 业务逻辑中原始数据落地的方法：
 
 <div align="center"><img src="pics//1553604430(1).png" width="350px"></div>
-
 数据库行级锁持有的时间（最差）：(update + 网络延迟 + GC)  +  (insert + 网络延迟 + GC) 。GC 的 Stop the World 时长大概在 50ms 左右，当系统中并发量越高，GC 就越频繁。
 
 **优化的方向**：如何减少行级锁持有的时间？
