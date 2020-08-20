@@ -101,9 +101,10 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 下图为秒杀 API 的 URL 设计：
 
 <div align="center"><img src="pics//1553562354(1).png" width="500px"></div>
+
 ### 4.5 SSM框架整合原理以及思路
 
-由于Spring MVC是Spring框架中的一个模块，所以整合只涉及两个模块整合
+由于Spring MVC是Spring框架中的一个模块，所以整合只涉及两个模块整合.
 
 - Spring和MyBatis整合
 - Spring MVC 和MyBatis整合
