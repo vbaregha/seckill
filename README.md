@@ -101,7 +101,6 @@ SeckillExecution executeSeckillProcedure(long seckillId, long userPhone, String 
 下图为秒杀 API 的 URL 设计：
 
 <div align="center"><img src="pics//1553562354(1).png" width="500px"></div>
-
 ### 4.5 SSM框架整合原理以及思路
 
 由于Spring MVC是Spring框架中的一个模块，所以整合只涉及两个模块整合.
@@ -202,6 +201,29 @@ jdbc.driver=com.mysql.jdbc.Driver
 jdbc.url=jdbc:mysql://127.0.0.1:3306/seckill?useUnicode=true&characterEncoding=utf8
 jdbc.username=root
 jdbc.password=123456
+```
+
+**其中Mybatis-config存放相关mybatis配置**
+
+```Java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 配置全局属性 -->
+    <settings>
+        <!-- 使用jdbc的getGeneratedKeys获取数据库自增主键值 -->
+        <setting name="useGeneratedKeys" value="true" />
+
+        <!-- 使用列别名替换列名 默认:true -->
+        <setting name="useColumnLabel" value="true" />
+
+        <!-- 开启驼峰命名转换:Table{create_time} -> Entity{createTime} -->
+        <setting name="mapUnderscoreToCamelCase" value="true" />
+    </settings>
+</configuration>
+
 ```
 
  **3.在【spring-web.xml】中完成 Spring MVC 的相关配置：** 
